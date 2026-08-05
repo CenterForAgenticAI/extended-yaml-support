@@ -1,0 +1,49 @@
+name: Bug report
+description: Report reproducible highlighting or decoration behavior.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not include credentials, proprietary prompts, or other sensitive YAML content.
+  - type: input
+    id: vscode-version
+    attributes:
+      label: Visual Studio Code version
+    validations:
+      required: true
+  - type: input
+    id: extension-version
+    attributes:
+      label: Extension version
+    validations:
+      required: true
+  - type: input
+    id: operating-system
+    attributes:
+      label: Operating system
+    validations:
+      required: true
+  - type: textarea
+    id: yaml
+    attributes:
+      label: Minimal YAML reproduction
+      render: yaml
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Relevant settings, theme, and YAML extensions

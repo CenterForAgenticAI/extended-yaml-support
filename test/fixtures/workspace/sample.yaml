@@ -1,0 +1,9 @@
+prompt: !md |
+  # Example
+
+  <context>
+  This workspace is used by the extension-host smoke test.
+  </context>
+
+script: !python |
+  print("ready")

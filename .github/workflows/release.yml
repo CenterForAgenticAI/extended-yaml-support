@@ -1,0 +1,116 @@
+name: Publish release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+concurrency:
+  group: marketplace-release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: ${{ github.event_name == 'workflow_dispatch' || !github.event.release.prerelease }}
+    name: Verify release candidate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: visual-studio-marketplace
+    steps:
+      - name: Check out release candidate
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.release.tag_name || github.ref }}
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+      - name: Verify registry signatures
+        run: npm audit signatures
+      - name: Verify tag matches extension version
+        if: ${{ github.event_name == 'release' }}
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          node --input-type=module <<'NODE'
+          import manifest from "./package.json" with { type: "json" };
+          const expected = `v${manifest.version}`;
+          if (process.env.RELEASE_TAG !== expected) {
+            throw new Error(`Release tag ${process.env.RELEASE_TAG} must equal ${expected}`);
+          }
+          NODE
+      - name: Verify release commit is on main
+        run: |
+          git fetch --no-tags origin main
+          git merge-base --is-ancestor HEAD origin/main
+      - name: Verify readiness run uses current main
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
+      - name: Run quality gates and package
+        run: npm run check
+      - name: Run packaged extension-host smoke test
+        run: xvfb-run -a npm run test:package
+      - name: Verify Marketplace publisher access
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          test -n "$VSCE_PAT" || { echo "VSCE_PAT is not configured" >&2; exit 1; }
+          npx --no-install vsce verify-pat CenterForAgenticAI
+      - name: Upload verified release candidate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: release-candidate-${{ github.run_id }}
+          path: artifacts/extended-yaml-support.vsix
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
+    name: Publish verified release candidate
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: visual-studio-marketplace
+    permissions:
+      contents: write
+    steps:
+      - name: Check out release source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.release.tag_name }}
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install publishing tool
+        run: npm ci
+      - name: Download verified release candidate
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: release-candidate-${{ github.run_id }}
+          path: artifacts
+      - name: Recheck package after transfer
+        run: npm run package:verify
+      - name: Attach tested package to GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$RELEASE_TAG" artifacts/extended-yaml-support.vsix --clobber
+      - name: Publish tested package to Visual Studio Marketplace
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          test -n "$VSCE_PAT" || { echo "VSCE_PAT is not configured" >&2; exit 1; }
+          npx --no-install vsce publish --skip-duplicate --packagePath artifacts/extended-yaml-support.vsix

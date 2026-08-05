@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate and package
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+      - name: Verify registry signatures
+        run: npm audit signatures
+      - name: Run quality gates
+        run: npm run check
+      - name: Upload tested extension package
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: extended-yaml-support-${{ github.sha }}
+          path: artifacts/extended-yaml-support.vsix
+          if-no-files-found: error
+          retention-days: 14
+
+  extension-host:
+    name: VS Code ${{ matrix.vscode-version }} ${{ matrix.mode }} smoke test
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - mode: development extension
+            packaged: false
+            vscode-version: "1.85.0"
+          - mode: packaged VSIX
+            packaged: true
+            vscode-version: stable
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Download tested extension package
+        if: ${{ matrix.packaged }}
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: extended-yaml-support-${{ github.sha }}
+          path: artifacts
+      - name: Run development extension-host smoke test
+        if: ${{ !matrix.packaged }}
+        env:
+          VSCODE_VERSION: ${{ matrix.vscode-version }}
+        run: xvfb-run -a npm run test:extension
+      - name: Run packaged extension-host smoke test
+        if: ${{ matrix.packaged }}
+        env:
+          VSCODE_VERSION: ${{ matrix.vscode-version }}
+        run: xvfb-run -a npm run test:package

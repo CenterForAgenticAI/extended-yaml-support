@@ -1,0 +1,298 @@
+{
+  "scopeName": "source.yaml.extended.injection",
+  "injectionSelector": "L:source.yaml -comment -string, L:source.yaml.1.0 -comment -string, L:source.yaml.1.1 -comment -string, L:source.yaml.1.2 -comment -string, L:source.yaml.1.3 -comment -string, L:text.yaml -comment -string, L:text.yaml.jinja -comment -string",
+  "patterns": [
+    {
+      "begin": "!(md|markdown)\\s+(?:&[^\\s]+\\s+)?(?:(\\|)|(>))(?:[1-9][-+]?|[-+][1-9]?)?\\s*(?:#.*)?$",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.tag.extended.yaml"
+        },
+        "2": {
+          "name": "keyword.control.flow.block-scalar.literal.yaml"
+        },
+        "3": {
+          "name": "keyword.control.flow.block-scalar.folded.yaml"
+        }
+      },
+      "end": "^(?=\\S)|(?!\\G)",
+      "patterns": [
+        {
+          "begin": "(?>^|\\G)([ ]+)(?! )",
+          "end": "^(?!\\1|\\s*$)",
+          "name": "meta.embedded.inline.markdown",
+          "patterns": [
+            {
+              "name": "meta.tag.custom.xml",
+              "begin": "(<)([a-zA-Z][\\w:.-]*)(?=\\s|>|/>)",
+              "beginCaptures": {
+                "1": {
+                  "name": "punctuation.definition.tag.begin.xml"
+                },
+                "2": {
+                  "name": "entity.name.tag.custom.xml"
+                }
+              },
+              "end": "(/>)|(?:(>))",
+              "patterns": [
+                {
+                  "name": "entity.other.attribute-name.xml",
+                  "match": "\\b([a-zA-Z][\\w:.-]*)(?=\\s*=)"
+                },
+                {
+                  "name": "string.quoted.double.xml",
+                  "begin": "\"",
+                  "end": "\""
+                },
+                {
+                  "name": "string.quoted.single.xml",
+                  "begin": "'",
+                  "end": "'"
+                }
+              ]
+            },
+            {
+              "name": "meta.tag.custom.end.xml",
+              "match": "(</)([a-zA-Z][\\w:.-]*)(>)"
+            },
+            {
+              "include": "text.html.markdown"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "begin": "!(py|python)\\s+(?:&[^\\s]+\\s+)?(?:(\\|)|(>))(?:[1-9][-+]?|[-+][1-9]?)?\\s*(?:#.*)?$",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.tag.extended.yaml"
+        },
+        "2": {
+          "name": "keyword.control.flow.block-scalar.literal.yaml"
+        },
+        "3": {
+          "name": "keyword.control.flow.block-scalar.folded.yaml"
+        }
+      },
+      "end": "^(?=\\S)|(?!\\G)",
+      "patterns": [
+        {
+          "begin": "(?>^|\\G)([ ]+)(?! )",
+          "end": "^(?!\\1|\\s*$)",
+          "name": "meta.embedded.inline.python",
+          "patterns": [
+            {
+              "include": "source.python"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "begin": "!(json)\\s+(?:&[^\\s]+\\s+)?(?:(\\|)|(>))(?:[1-9][-+]?|[-+][1-9]?)?\\s*(?:#.*)?$",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.tag.extended.yaml"
+        },
+        "2": {
+          "name": "keyword.control.flow.block-scalar.literal.yaml"
+        },
+        "3": {
+          "name": "keyword.control.flow.block-scalar.folded.yaml"
+        }
+      },
+      "end": "^(?=\\S)|(?!\\G)",
+      "patterns": [
+        {
+          "begin": "(?>^|\\G)([ ]+)(?! )",
+          "end": "^(?!\\1|\\s*$)",
+          "name": "meta.embedded.inline.json",
+          "patterns": [
+            {
+              "include": "source.json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "begin": "!(ts|typescript)\\s+(?:&[^\\s]+\\s+)?(?:(\\|)|(>))(?:[1-9][-+]?|[-+][1-9]?)?\\s*(?:#.*)?$",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.tag.extended.yaml"
+        },
+        "2": {
+          "name": "keyword.control.flow.block-scalar.literal.yaml"
+        },
+        "3": {
+          "name": "keyword.control.flow.block-scalar.folded.yaml"
+        }
+      },
+      "end": "^(?=\\S)|(?!\\G)",
+      "patterns": [
+        {
+          "begin": "(?>^|\\G)([ ]+)(?! )",
+          "end": "^(?!\\1|\\s*$)",
+          "name": "meta.embedded.inline.typescript",
+          "patterns": [
+            {
+              "include": "source.ts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "begin": "!(rs|rust)\\s+(?:&[^\\s]+\\s+)?(?:(\\|)|(>))(?:[1-9][-+]?|[-+][1-9]?)?\\s*(?:#.*)?$",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.tag.extended.yaml"
+        },
+        "2": {
+          "name": "keyword.control.flow.block-scalar.literal.yaml"
+        },
+        "3": {
+          "name": "keyword.control.flow.block-scalar.folded.yaml"
+        }
+      },
+      "end": "^(?=\\S)|(?!\\G)",
+      "patterns": [
+        {
+          "begin": "(?>^|\\G)([ ]+)(?! )",
+          "end": "^(?!\\1|\\s*$)",
+          "name": "meta.embedded.inline.rust",
+          "patterns": [
+            {
+              "include": "source.rust"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "begin": "!(bash|sh|shell)\\s+(?:&[^\\s]+\\s+)?(?:(\\|)|(>))(?:[1-9][-+]?|[-+][1-9]?)?\\s*(?:#.*)?$",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.tag.extended.yaml"
+        },
+        "2": {
+          "name": "keyword.control.flow.block-scalar.literal.yaml"
+        },
+        "3": {
+          "name": "keyword.control.flow.block-scalar.folded.yaml"
+        }
+      },
+      "end": "^(?=\\S)|(?!\\G)",
+      "patterns": [
+        {
+          "begin": "(?>^|\\G)([ ]+)(?! )",
+          "end": "^(?!\\1|\\s*$)",
+          "name": "meta.embedded.inline.shell",
+          "patterns": [
+            {
+              "include": "source.shell"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "begin": "!(rb|ruby)\\s+(?:&[^\\s]+\\s+)?(?:(\\|)|(>))(?:[1-9][-+]?|[-+][1-9]?)?\\s*(?:#.*)?$",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.tag.extended.yaml"
+        },
+        "2": {
+          "name": "keyword.control.flow.block-scalar.literal.yaml"
+        },
+        "3": {
+          "name": "keyword.control.flow.block-scalar.folded.yaml"
+        }
+      },
+      "end": "^(?=\\S)|(?!\\G)",
+      "patterns": [
+        {
+          "begin": "(?>^|\\G)([ ]+)(?! )",
+          "end": "^(?!\\1|\\s*$)",
+          "name": "meta.embedded.inline.ruby",
+          "patterns": [
+            {
+              "include": "source.ruby"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "begin": "!(diff|patch)\\s+(?:&[^\\s]+\\s+)?(?:(\\|)|(>))(?:[1-9][-+]?|[-+][1-9]?)?\\s*(?:#.*)?$",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.tag.extended.yaml"
+        },
+        "2": {
+          "name": "keyword.control.flow.block-scalar.literal.yaml"
+        },
+        "3": {
+          "name": "keyword.control.flow.block-scalar.folded.yaml"
+        }
+      },
+      "end": "^(?=\\S)|(?!\\G)",
+      "patterns": [
+        {
+          "begin": "(?>^|\\G)([ ]+)(?! )",
+          "end": "^(?!\\1|\\s*$)",
+          "name": "meta.embedded.inline.diff",
+          "patterns": [
+            {
+              "match": "(?:^|\\G)\\s*(?:\\*\\*\\*|---|\\+\\+\\+).*$",
+              "name": "meta.diff.header"
+            },
+            {
+              "match": "(?:^|\\G)\\s*@@.*$",
+              "name": "meta.diff.range"
+            },
+            {
+              "match": "(?:^|\\G)\\s*\\+.*$",
+              "name": "markup.inserted.diff"
+            },
+            {
+              "match": "(?:^|\\G)\\s*-.*$",
+              "name": "markup.deleted.diff"
+            },
+            {
+              "include": "source.diff"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "begin": "!(toml)\\s+(?:&[^\\s]+\\s+)?(?:(\\|)|(>))(?:[1-9][-+]?|[-+][1-9]?)?\\s*(?:#.*)?$",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.tag.extended.yaml"
+        },
+        "2": {
+          "name": "keyword.control.flow.block-scalar.literal.yaml"
+        },
+        "3": {
+          "name": "keyword.control.flow.block-scalar.folded.yaml"
+        }
+      },
+      "end": "^(?=\\S)|(?!\\G)",
+      "patterns": [
+        {
+          "begin": "(?>^|\\G)([ ]+)(?! )",
+          "end": "^(?!\\1|\\s*$)",
+          "name": "meta.embedded.inline.toml",
+          "patterns": [
+            {
+              "include": "source.toml"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

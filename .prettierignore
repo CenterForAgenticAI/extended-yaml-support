@@ -1,0 +1,6 @@
+artifacts/
+coverage/
+dist/
+node_modules/
+.vscode-test/
+syntaxes/extended-yaml-injection.json
