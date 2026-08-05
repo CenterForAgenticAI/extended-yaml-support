@@ -4,7 +4,7 @@ Thank you for helping improve Extended YAML Support.
 
 ## Development setup
 
-Use Node.js 22 or later.
+Use Node.js 22.13 or later in the Node 22 line, or Node.js 24 or later.
 
 ```console
 npm install

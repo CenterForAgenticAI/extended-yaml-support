@@ -99,7 +99,7 @@ Add the remaining tags you use from the table above.
 
 ## Development
 
-Requirements: Node.js 22 or later and npm.
+Requirements: Node.js 22.13 or later in the Node 22 line, or Node.js 24 or later, with npm.
 
 ```console
 npm install
